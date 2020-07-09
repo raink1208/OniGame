@@ -9,6 +9,8 @@ use rain1208\oniGame\game\Game;
 
 class OniGame extends PluginBase
 {
+    public const PLGUIN_TAG = "[OniGame]";
+
     /** @var OniGame */
     private static $instance;
 
@@ -28,6 +30,7 @@ class OniGame extends PluginBase
     public function createGame()
     {
         $this->game = new Game();
+        $this->getServer()->broadcastMessage(self::PLGUIN_TAG."ゲームを生成しました");
     }
 
     public function getGame(): Game
