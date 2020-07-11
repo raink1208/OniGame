@@ -40,6 +40,12 @@ class OniGame extends PluginBase
         $this->getServer()->broadcastMessage(self::PLGUIN_TAG."ゲームを生成しました");
     }
 
+    public function startGame(): void
+    {
+        if (!isset($this->game)) return;
+        $this->game->startGame();
+    }
+
     public function getGame(): Game
     {
         return $this->game ?? null;
