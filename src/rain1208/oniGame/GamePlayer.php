@@ -10,7 +10,7 @@ class GamePlayer
     private $player;
 
     private $state; //Playing Spectating
-    private $job; //Oni escape waiting
+    private $job; //Oni Escape waiting
 
     public function __construct(Player $player)
     {
@@ -27,6 +27,26 @@ class GamePlayer
     public function getName():string
     {
         return $this->player->getName();
+    }
+
+    public function isOni(): bool
+    {
+        return ($this->job === "Oni")? true : false;
+    }
+
+    public function setOni(): void
+    {
+        $this->job = "Oni";
+    }
+
+    public function isEscape(): bool
+    {
+        return ($this->job === "Escape")? true : false;
+    }
+
+    public function setEscape(): void
+    {
+        $this->job = "Escape";
     }
 
     public function isPlaying(): bool
