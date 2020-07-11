@@ -14,6 +14,8 @@ class OniGame extends PluginBase
     /** @var OniGame */
     private static $instance;
 
+    private $configManager;
+
     /** @var Game */
     private $game;
 
@@ -25,6 +27,11 @@ class OniGame extends PluginBase
     public static function getInstance():OniGame
     {
         return self::$instance;
+    }
+
+    public function getConfigManager(): ConfigManager
+    {
+        return $this->configManager;
     }
 
     public function createGame()
