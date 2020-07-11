@@ -17,6 +17,7 @@ class Game
 
     /** @var GamePlayer[] */
     private $players;
+    /** @var GamePlayer[] */
     private $spectates;
 
     private $status;
@@ -51,15 +52,32 @@ class Game
         OniGame::getInstance()->getServer()->broadcastMessage("ゲームを開始します");
     }
 
+    public function initPlayer(Player $player): void
+    {
+        if ($player->isOnline()) {
+            $player->setGamemode(Player::SURVIVAL);
+            $player->getArmorInventory()->clearAll();
+            $player->getInventory()->clearAll();
+            $player->setHealth($player->getMaxHealth());
+            $player->setFood($player->getMaxFood());
+            $player->removeAllEffects();
+        }
+    }
+
     public function spectate(Player $player): void
     {
         $this->players[$player->getName()]->setSpectating();
+        $this->spectates[$player->getName()] = $this->players[$player->getName()];
         $player->setGamemode(Player::SPECTATOR);
+        $player->sendMessage("あなたは観戦中です");
     }
 
     public function joinGame(Player $player): void
     {
         $this->players[$player->getName()] = new GamePlayer($player);
+        if ($this->status) {
+            $this->spectate($player);
+        }
     }
 
     public function leaveGame(Player $player): void
