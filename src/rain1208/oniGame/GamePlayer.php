@@ -29,6 +29,11 @@ class GamePlayer
         return $this->player->getName();
     }
 
+    public function getPlayer(): Player
+    {
+        return $this->player;
+    }
+
     public function isOni(): bool
     {
         return ($this->job === "Oni")? true : false;
