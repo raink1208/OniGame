@@ -9,6 +9,7 @@ use pocketmine\entity\EffectInstance;
 use pocketmine\item\Armor;
 use pocketmine\Player;
 use pocketmine\scheduler\Task;
+use pocketmine\Server;
 use rain1208\oniGame\GamePlayer;
 use rain1208\oniGame\map\Map;
 use rain1208\oniGame\OniGame;
@@ -20,7 +21,7 @@ class Game
 
     /** @var GamePlayer[] */
     private $players;
-    /** @var GamePlayer[] */
+    /** @var GamePlayer[] Name => GamePlayer*/
     private $spectates;
 
     private $status;
@@ -48,6 +49,11 @@ class Game
         return $this->status;
     }
 
+    public function playerExists(Player $player): bool
+    {
+        return in_array($player->getName(),$this->players);
+    }
+
     public function startGame(): void
     {
         $this->setStatus(true);
@@ -69,8 +75,10 @@ class Game
             $player->removeAllEffects();
             if ($this->players[$player->getName()]->isOni()) {
                 $player->getInventory()->setItem(1,Armor::get(Armor::MOB_HEAD,0,1));
+                $player->addEffect(new EffectInstance(Effect::getEffect(Effect::BLINDNESS),20,5));
+            } else {
+                $player->addEffect(new EffectInstance(Effect::getEffect(Effect::BLINDNESS),5,5));
             }
-            $player->addEffect(new EffectInstance(Effect::getEffect(Effect::BLINDNESS),5,5));
         }
     }
 
@@ -79,7 +87,7 @@ class Game
         $this->players[$player->getName()]->setSpectating();
         $this->spectates[$player->getName()] = $this->players[$player->getName()];
         $player->setGamemode(Player::SPECTATOR);
-        $player->sendMessage("あなたは観戦中です");
+        $player->sendMessage(OniGame::PLGUIN_TAG."あなたは観戦中です");
     }
 
     public function joinGame(Player $player): void
@@ -88,6 +96,29 @@ class Game
         if ($this->status) {
             $this->spectate($player);
         }
+        Server::getInstance()->broadcastMessage(OniGame::PLGUIN_TAG.$player->getName()."さんが参加しました");
+    }
+
+    public function changeOni(Player $damager,Player $hitter)
+    {
+        $oni = $this->players[$damager->getName()];
+        $escape = $this->players[$hitter->getName()];
+        if ($oni->isOni() && $escape->isEscape()) {
+            $oni->setEscape();
+            $this->initPlayer($damager);
+            $escape->setOni();
+            $this->initPlayer($hitter);
+            Server::getInstance()->broadcastMessage(
+                OniGame::PLGUIN_TAG."鬼が".$escape->getName()."になりました"
+            );
+        }
+    }
+
+    public function randomOni(): void
+    {
+        $player = $this->players[array_rand($this->players)];
+        $player->setOni();
+        OniGame::getInstance()->getServer()->broadcastMessage($player->getName()."さんが鬼に選ばれました");
     }
 
     public function leaveGame(Player $player): void
@@ -98,7 +129,7 @@ class Game
     public function endGame(): void
     {
         $this->setStatus(false);
-        OniGame::getInstance()->getServer()->broadcastMessage("ゲームを終了します");
+        OniGame::getInstance()->getServer()->broadcastMessage(OniGame::PLGUIN_TAG."ゲームを終了します");
         OniGame::getInstance()->getScheduler()->cancelTask($this->gameTask->getTaskId());
     }
 }

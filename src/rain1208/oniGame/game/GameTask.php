@@ -19,6 +19,9 @@ class GameTask extends Task
 
     public function onRun(int $currentTick)
     {
-
+        if ($this->count >= 15) {
+            $this->game->endGame();
+        }
+        $this->count++;
     }
 }
